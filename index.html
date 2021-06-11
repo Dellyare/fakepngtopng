@@ -8,50 +8,111 @@
 
 <div>
 	<h1>
-		<span class="header-fake">Fake</span>PNG To PNG
+		<span class="header-fake">Fake</span>PNGToPNG
 	</h1>
 </div>
 
-<div>
-	<img src="./sm_5b348d4c557a7.jpg" alt="" id="image">
-	<br>
-	<canvas id="canvas"></canvas>
+<div class="canvas-holder">
+	<div class="image">
+		<img src="./images/1457601093334c1.jpg" alt="" id="image" class="canvas-holder__image">
+		<input type="file" id="imageInput" class="image__input" onchange="updateImg()">
+	</div>
+
+	<div class="controls">
+		<label for="grid">Сетка:</label>
+		<input type="range" min="5" max="50" step="1" value="15" id="grid" onchange="grid()">
+		<br>
+		<label for="colorOffset">Сдвиг цвета:</label>
+		<input type="range" min="1" max="30" step="1" value="15" id="colorOffset" onchange="grid()">
+		<br>
+		<label for="drawGrid">Рисовать сетку:</label>
+		<input type="checkbox" id="drawGrid" onclick="grid()">
+		<br>
+		<label for="startColor">Начальный цвет серый:</label>
+		<input type="checkbox" id="startColor" onclick="grid()" checked>
+		<br>
+		<label for="colorWhite">Белый цвет:</label>
+		<input type="color" id="colorWhite" onchange="grid()" value="#FFFFFF">
+		<br>
+		<label for="colorGray">Серый цвет:</label>
+		<input type="color" id="colorGray" onchange="grid()" value="#F0F0F0">
+	</div>
+	<div class="canvas-holder__fixer">
+		<canvas id="canvas" class="canvas-holder__canvas" onclick="download()"></canvas>
+	</div>
 </div>
 
-<div class="controls">
-	<label for="grid">Сетка</label>
-	<input type="range" min="5" max="50" step="1" value="15" id="grid" onchange="grid()">
-	<label for="colorOffset">Точность цвета</label>
-	<input type="range" min="1" max="30" step="1" value="15" id="colorOffset" onchange="grid()">
-	<label for="drawGrid">Рисовать сетку</label>
-	<input type="checkbox" id="drawGrid" onclick="grid()">
-</div>
-
-
+<span class="author">Developed By <a href="https://github.com/Dellyare">Dellyare</a></span>
 </body>
 
 
 <style>
-	.header-fake {
-			color: #fc2222;
-      text-decoration: underline;
-	}
+		.author {
+				position: absolute;
+				bottom: 15px;
+				left: 15px;
+				color: #cfcfcf;
+		}
+		.author a {
+				text-decoration: none;
+				font-weight: 800;
+				color: #cccccc;
+		}
+		.image {
+				width: 360px;
+		}
+		.image__input {
+				margin: auto;
+				display: block;
+		}
+		.canvas-holder__canvas, .canvas-holder__image {
+				border-radius: 15px;
+		}
+		.canvas-holder__fixer {
+				width: 360px;
+				height: 360px;
+		}
+		.canvas-holder__canvas {
+				width: 100%;
+				height: 100%;
+		}
+		.canvas-holder__image {
+				/*display: none;*/
+				width: 360px;
+				height: 360px;
+		}
+		.controls {
+				display: block;
+				margin: auto;
+		}
+		.canvas-holder {
+				padding: 30px;
+				border-radius: 30px;
+				display: flex;
+        box-shadow: #33333333 0 8px 20px 0;
+				width: 1000px;
+				margin: auto;
+        justify-content: space-between;
+    }
+		.header-fake {
+				color: #fc2222;
+		}
 
-	h1 {
-			color: #ffffff;
-			width: 100%;
-			text-align: center;
-	}
-	body {
-			background: #33333c;
-			padding: 0;
-			margin: 0;
-			font-family: "Segoe UI";
-	}
+		h1 {
+				width: 100%;
+				text-align: center;
+				color: black;
+				font-style: italic;
+		}
+		body {
+				padding: 0;
+				margin: 0;
+				font-family: "Segoe UI";
+		}
 
-	canvas {
-			background: magenta;
-	}
+		canvas {
+				background: magenta;
+		}
 
 </style>
 
@@ -59,20 +120,53 @@
 <script>
 
 	let colors = {
-		white: 255,
-		gray: 230,
+		white: {
+			r: 255,
+			g: 255,
+			b: 255
+		},
+		gray: {
+			r: 230,
+			g: 230,
+			b: 230
+		},
 		offset: 15,
 		grid: 15,
-		startColor: 0,
+		startColor: true,
 		drawGrid: false
+	}
+
+	function updateImg() {
+		document.getElementById("image").src = URL.createObjectURL(document.getElementById("imageInput").files[0]);
 	}
 
 	function grid(){
 		colors.grid = +document.getElementById("grid").value;
 		colors.offset = +document.getElementById("colorOffset").value;
-		console.log(colors.offset)
 		colors.drawGrid = document.getElementById("drawGrid").checked;
+		colors.startColor = document.getElementById("startColor").checked;
+
+		let colorWhite = document.getElementById("colorWhite").value;
+		let colorGray = document.getElementById("colorGray").value;
+
+		colors.white.r = hexToRgb(colorWhite).r;
+		colors.white.g = hexToRgb(colorWhite).g;
+		colors.white.b = hexToRgb(colorWhite).b;
+
+		colors.gray.r = hexToRgb(colorGray).r;
+		colors.gray.g = hexToRgb(colorGray).g;
+		colors.gray.b = hexToRgb(colorGray).b;
+
 		load();
+	}
+
+	function hexToRgb(hex) {
+		let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		return result ? {
+			r: parseInt(result[1], 16),
+			g: parseInt(result[2], 16),
+			b: parseInt(result[3], 16)
+		} : null;
 	}
 
 	function inGrid(x, y, grid) {
@@ -80,9 +174,16 @@
 				gridY = parseInt(y/grid);
 
 		if ((gridX % 2 === 0 && gridY % 2 === 0) || (gridX % 2 !== 0 && gridY % 2 !== 0)) {
-			return true;
+			return colors.startColor;
+		} else {
+			return !colors.startColor
 		}
 
+	}
+
+	function download() {
+		console.log(document.getElementById("canvas").toDataURL("image/jpg"))
+		// window.open(dataURItoBlob(document.getElementById("canvas").toDataURL("image/jpg")).toString(), '_self');
 	}
 
 	// 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1
@@ -97,8 +198,11 @@
 
 		let image = document.getElementById("image");
 
-		canvas.width = image.width;
-		canvas.height = image.height;
+		let actualImage = new Image();
+		actualImage.src = image.src
+
+		canvas.width = actualImage.width;
+		canvas.height = actualImage.height;
 
 		ctx.drawImage(image, 0, 0);
 
@@ -112,17 +216,17 @@
 
 			if (inGrid(parseInt((i / 4) % canvas.width), parseInt(i / (canvas.width * 4)), colors.grid)) {
 				if (
-					(r < colors.gray + colors.offset && r > colors.gray - colors.offset) &&
-					(g < colors.gray + colors.offset && g > colors.gray - colors.offset) &&
-					(b < colors.gray + colors.offset && b > colors.gray - colors.offset)
+					(r < colors.gray.r + colors.offset && r > colors.gray.r - colors.offset) &&
+					(g < colors.gray.g + colors.offset && g > colors.gray.g - colors.offset) &&
+					(b < colors.gray.b + colors.offset && b > colors.gray.b - colors.offset)
 				) {
 					pix[i + 3] = 0;
 				}
 			} else {
 				if (
-					(r < colors.white + colors.offset && r > colors.white - colors.offset) &&
-					(g < colors.white + colors.offset && g > colors.white - colors.offset) &&
-					(b < colors.white + colors.offset && b > colors.white - colors.offset)
+					(r < colors.white.r + colors.offset && r > colors.white.r - colors.offset) &&
+					(g < colors.white.g + colors.offset && g > colors.white.g - colors.offset) &&
+					(b < colors.white.b + colors.offset && b > colors.white.b - colors.offset)
 					) {
 					pix[i + 3] = 0;
 				}
