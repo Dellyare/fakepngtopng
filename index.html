@@ -23,7 +23,7 @@
 		<input type="range" min="5" max="50" step="1" value="15" id="grid" onchange="grid()">
 		<br>
 		<label for="colorOffset">Сдвиг цвета:</label>
-		<input type="range" min="1" max="30" step="1" value="15" id="colorOffset" onchange="grid()">
+		<input type="range" min="1" max="50" step="1" value="15" id="colorOffset" onchange="grid()">
 		<br>
 		<label for="drawGrid">Рисовать сетку:</label>
 		<input type="checkbox" id="drawGrid" onclick="grid()">
@@ -47,6 +47,9 @@
 
 
 <style>
+		.canvas-holder__image, .canvas-holder__fixer {
+				background: magenta;
+		}
 		.author {
 				position: absolute;
 				bottom: 15px;
@@ -65,21 +68,21 @@
 				margin: auto;
 				display: block;
 		}
-		.canvas-holder__canvas, .canvas-holder__image {
-				border-radius: 15px;
-		}
 		.canvas-holder__fixer {
 				width: 360px;
 				height: 360px;
 		}
 		.canvas-holder__canvas {
-				width: 100%;
-				height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+				display: block;
+				margin: auto;
 		}
 		.canvas-holder__image {
 				/*display: none;*/
 				width: 360px;
 				height: 360px;
+				object-fit: contain;
 		}
 		.controls {
 				display: block;
