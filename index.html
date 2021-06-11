@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<title>FakePNGToPNG</title>
 </head>
-<body onload="load()">
+<body onload="draw()">
 
 <div>
 	<h1>
@@ -19,23 +19,23 @@
 	</div>
 
 	<div class="controls">
-		<label for="grid">Сетка:</label>
-		<input type="range" min="5" max="50" step="1" value="15" id="grid" onchange="grid()">
+		<label for="grid">Рамзер сетки:</label>
+		<input type="range" min="5" max="50" step="1" value="15" id="grid" onchange="update()">
 		<br>
-		<label for="colorOffset">Сдвиг цвета:</label>
-		<input type="range" min="1" max="50" step="1" value="15" id="colorOffset" onchange="grid()">
+		<label for="colorOffset">Допуск цвета:</label>
+		<input type="range" min="1" max="50" step="1" value="15" id="colorOffset" onchange="update()">
 		<br>
 		<label for="drawGrid">Рисовать сетку:</label>
-		<input type="checkbox" id="drawGrid" onclick="grid()">
+		<input type="checkbox" id="drawGrid" onclick="update()">
 		<br>
-		<label for="startColor">Начальный цвет серый:</label>
-		<input type="checkbox" id="startColor" onclick="grid()" checked>
+		<label for="startColor">Инвертировать сетку:</label>
+		<input type="checkbox" id="startColor" onclick="update()" checked>
 		<br>
-		<label for="colorWhite">Белый цвет:</label>
-		<input type="color" id="colorWhite" onchange="grid()" value="#FFFFFF">
+		<label for="colorWhite">Первый цвет:</label>
+		<input type="color" id="colorWhite" onchange="update()" value="#FFFFFF">
 		<br>
-		<label for="colorGray">Серый цвет:</label>
-		<input type="color" id="colorGray" onchange="grid()" value="#F0F0F0">
+		<label for="colorGray">Второй цвет:</label>
+		<input type="color" id="colorGray" onchange="update()" value="#F0F0F0">
 	</div>
 	<div class="canvas-holder__fixer">
 		<canvas id="canvas" class="canvas-holder__canvas" onclick="download()"></canvas>
@@ -69,6 +69,7 @@
 				display: block;
 		}
 		.canvas-holder__fixer {
+				display: flex;
 				width: 360px;
 				height: 360px;
 		}
@@ -77,6 +78,11 @@
         max-height: 100%;
 				display: block;
 				margin: auto;
+				cursor: pointer;
+				transition: all .3s;
+		}
+		.canvas-holder__canvas:hover {
+        box-shadow: #33333333 0 8px 20px 0;
 		}
 		.canvas-holder__image {
 				/*display: none;*/
@@ -112,95 +118,82 @@
 				margin: 0;
 				font-family: "Segoe UI";
 		}
-
 		canvas {
 				background: magenta;
 		}
-
 </style>
 
 
 <script>
-
-	let colors = {
-		white: {
-			r: 255,
-			g: 255,
-			b: 255
-		},
-		gray: {
-			r: 230,
-			g: 230,
-			b: 230
-		},
-		offset: 15,
-		grid: 15,
-		startColor: true,
-		drawGrid: false
-	}
+	let data = {
+				white: {r: 255, g: 255, b: 255},
+				gray: {r: 230, g: 230, b: 230},
+				offset: 15,
+				grid: 15,
+				startColor: true,
+				drawGrid: false
+			},
+			canvas = document.getElementById("canvas"),
+			ctx = canvas.getContext("2d"),
+			image = document.getElementById("image");
 
 	function updateImg() {
-		document.getElementById("image").src = URL.createObjectURL(document.getElementById("imageInput").files[0]);
+		document.getElementById("image").src = URL.createObjectURL(document.getElementById("imageInput").files[0])
+		setTimeout(() => draw(), 10)
 	}
 
-	function grid(){
-		colors.grid = +document.getElementById("grid").value;
-		colors.offset = +document.getElementById("colorOffset").value;
-		colors.drawGrid = document.getElementById("drawGrid").checked;
-		colors.startColor = document.getElementById("startColor").checked;
+	function update(){
+		data.grid = +document.getElementById("grid").value;
+		data.offset = +document.getElementById("colorOffset").value;
+		data.drawGrid = document.getElementById("drawGrid").checked;
+		data.startColor = document.getElementById("startColor").checked;
 
-		let colorWhite = document.getElementById("colorWhite").value;
-		let colorGray = document.getElementById("colorGray").value;
+		let colorWhite = document.getElementById("colorWhite").value,
+				colorGray = document.getElementById("colorGray").value;
 
-		colors.white.r = hexToRgb(colorWhite).r;
-		colors.white.g = hexToRgb(colorWhite).g;
-		colors.white.b = hexToRgb(colorWhite).b;
+		data.white.r = hexToRgb(colorWhite).r;
+		data.white.g = hexToRgb(colorWhite).g;
+		data.white.b = hexToRgb(colorWhite).b;
 
-		colors.gray.r = hexToRgb(colorGray).r;
-		colors.gray.g = hexToRgb(colorGray).g;
-		colors.gray.b = hexToRgb(colorGray).b;
+		data.gray.r = hexToRgb(colorGray).r;
+		data.gray.g = hexToRgb(colorGray).g;
+		data.gray.b = hexToRgb(colorGray).b;
 
-		load();
+		draw();
 	}
 
 	function hexToRgb(hex) {
 		let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-		return result ? {
+		return {
 			r: parseInt(result[1], 16),
 			g: parseInt(result[2], 16),
 			b: parseInt(result[3], 16)
-		} : null;
+		}
 	}
 
 	function inGrid(x, y, grid) {
-		let gridX = parseInt(x/grid),
-				gridY = parseInt(y/grid);
+		let gridX = parseInt(x / grid),
+				gridY = parseInt(y / grid);
 
 		if ((gridX % 2 === 0 && gridY % 2 === 0) || (gridX % 2 !== 0 && gridY % 2 !== 0)) {
-			return colors.startColor;
+			return data.startColor;
 		} else {
-			return !colors.startColor
+			return !data.startColor
 		}
-
 	}
 
 	function download() {
-		console.log(document.getElementById("canvas").toDataURL("image/jpg"))
-		// window.open(dataURItoBlob(document.getElementById("canvas").toDataURL("image/jpg")).toString(), '_self');
+		let img = canvas.toDataURL("image/png"),
+				a = document.createElement('a');
+
+		a.href = img;
+		a.download = "fptp.png";
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
 	}
 
-	// 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1
-	//               ^
-	//               8
-
-	function load() {
-		let canvas = document.getElementById("canvas");
-		let ctx = canvas.getContext("2d");
-
-		ctx.fillStyle = "rgba(0,0,0,0)";
-
-		let image = document.getElementById("image");
-
+	function draw() {
 		let actualImage = new Image();
 		actualImage.src = image.src
 
@@ -209,33 +202,31 @@
 
 		ctx.drawImage(image, 0, 0);
 
-		let imgd = ctx.getImageData(0, 0, canvas.width, canvas.height),
-			pix = imgd.data;
+		let imgGrid = ctx.getImageData(0, 0, canvas.width, canvas.height),
+			pix = imgGrid.data;
 
 		for (let i = 0; i < pix.length; i += 4) {
 			let r = pix[i],
 					g = pix[i+1],
 					b = pix[i+2];
 
-			if (inGrid(parseInt((i / 4) % canvas.width), parseInt(i / (canvas.width * 4)), colors.grid)) {
-				if (
-					(r < colors.gray.r + colors.offset && r > colors.gray.r - colors.offset) &&
-					(g < colors.gray.g + colors.offset && g > colors.gray.g - colors.offset) &&
-					(b < colors.gray.b + colors.offset && b > colors.gray.b - colors.offset)
+			if (inGrid(parseInt((i / 4) % canvas.width), parseInt(i / (canvas.width * 4)), data.grid) && // Gray grid
+				(r < data.gray.r + data.offset && r > data.gray.r - data.offset) &&
+				(g < data.gray.g + data.offset && g > data.gray.g - data.offset) &&
+				(b < data.gray.b + data.offset && b > data.gray.b - data.offset)
+			) {
+				pix[i + 3] = 0;
+			}
+			else if (!inGrid(parseInt((i / 4) % canvas.width), parseInt(i / (canvas.width * 4)), data.grid) && // White grid
+				(r < data.white.r + data.offset && r > data.white.r - data.offset) &&
+				(g < data.white.g + data.offset && g > data.white.g - data.offset) &&
+				(b < data.white.b + data.offset && b > data.white.b - data.offset)
 				) {
-					pix[i + 3] = 0;
-				}
-			} else {
-				if (
-					(r < colors.white.r + colors.offset && r > colors.white.r - colors.offset) &&
-					(g < colors.white.g + colors.offset && g > colors.white.g - colors.offset) &&
-					(b < colors.white.b + colors.offset && b > colors.white.b - colors.offset)
-					) {
-					pix[i + 3] = 0;
-				}
+				pix[i + 3] = 0;
 			}
 
-			if (colors.drawGrid && inGrid(parseInt((i / 4) % canvas.width), parseInt(i / (canvas.width * 4)), colors.grid)) {
+			// Grid
+			if (data.drawGrid && inGrid(parseInt((i / 4) % canvas.width), parseInt(i / (canvas.width * 4)), data.grid)) {
 				pix[i] = 255;
 				pix[i+1] = 15;
 				pix[i+2] = 15;
@@ -243,8 +234,8 @@
 			}
 		}
 
-		ctx.putImageData(imgd, 0, 0);
-		console.log("Redraw")
+		ctx.putImageData(imgGrid, 0, 0);
+		console.log("Redraw: ", data.grid, data.offset);
 	}
 
 </script>
