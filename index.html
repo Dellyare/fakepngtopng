@@ -2,28 +2,25 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>FakePNGToPNG</title>
+	<title>FP2P</title>
 </head>
 <body onload="draw()">
 
 <div>
 	<h1>
-		<span class="header-fake">Fake</span>PNGToPNG
+		<span class="header-fake">Fake</span>PNG2PNG
 	</h1>
 </div>
 
 <div class="canvas-holder">
-	<div class="image">
-		<img src="./images/1457601093334c1.jpg" alt="" id="image" class="canvas-holder__image">
+	<div class="image" id="dragDropArea">
+		<img src="./images/sm_5b348d4c557a7.jpg" alt="" id="image" class="canvas-holder__image">
 		<input type="file" id="imageInput" class="image__input" onchange="updateImg()">
 	</div>
 
 	<div class="controls">
 		<label for="grid">Размер сетки:</label>
-		<input type="range" min="5" max="50" step="1" value="15" id="grid" onchange="update()">
-		<br>
-		<label for="colorOffset">Допуск цвета:</label>
-		<input type="range" min="1" max="50" step="1" value="15" id="colorOffset" onchange="update()">
+		<input type="range" min="5" max="50" step="1" value="24" id="grid" onchange="update()">
 		<br>
 		<label for="drawGrid">Рисовать сетку:</label>
 		<input type="checkbox" id="drawGrid" onclick="update()">
@@ -31,22 +28,38 @@
 		<label for="startColor">Инвертировать сетку:</label>
 		<input type="checkbox" id="startColor" onclick="update()" checked>
 		<br>
+		<br>
+		<label for="colorOffset">Допуск цвета:</label>
+		<input type="range" min="1" max="50" step="1" value="10" id="colorOffset" onchange="update()">
+		<br>
+		<br>
 		<label for="colorWhite">Первый цвет:</label>
 		<input type="color" id="colorWhite" onchange="update()" value="#FFFFFF">
 		<br>
 		<label for="colorGray">Второй цвет:</label>
-		<input type="color" id="colorGray" onchange="update()" value="#F0F0F0">
+		<input type="color" id="colorGray" onchange="update()" value="#EEEEEE">
 	</div>
-	<div class="canvas-holder__fixer">
-		<canvas id="canvas" class="canvas-holder__canvas" onclick="download()"></canvas>
+	<div>
+		<div class="canvas-holder__fixer">
+			<canvas id="canvas" class="canvas-holder__canvas" onclick="download()"></canvas>
+		</div>
+		<span class="canvas-holder__span">нажми на результат, что бы его скачать</span>
 	</div>
 </div>
 
-<span class="author">Developed By <a href="https://github.com/Dellyare">Dellyare</a></span>
+<span class="author">Разработал <a href="https://github.com/Dellyare">Dellyare</a></span>
 </body>
 
 
 <style>
+		.canvas-holder__span {
+				font-size: 12px;
+				text-align: center;
+        width: 100%;
+        display: block;
+				opacity: .6;
+				cursor: default;
+		}
 		.canvas-holder__image, .canvas-holder__fixer {
 				background: magenta;
 		}
@@ -96,9 +109,10 @@
 		}
 		.canvas-holder {
 				padding: 30px;
-				border-radius: 30px;
+				/*border-radius: 30px;*/
+				border: #EDEDED 10px solid;
 				display: flex;
-        box-shadow: #33333333 0 8px 20px 0;
+				background: #FCFCFC;
 				width: 1000px;
 				margin: auto;
         justify-content: space-between;
@@ -110,13 +124,14 @@
 		h1 {
 				width: 100%;
 				text-align: center;
-				color: black;
+				color: #111111;
 				font-style: italic;
 		}
 		body {
 				padding: 0;
 				margin: 0;
 				font-family: "Segoe UI";
+				background: #FFFFFF;
 		}
 		canvas {
 				background: magenta;
@@ -125,11 +140,28 @@
 
 
 <script>
+	let dropZone = document.getElementById('dragDropArea');
+
+	dropZone.addEventListener('dragover', function(e) {
+		e.stopPropagation();
+		e.preventDefault();
+		e.dataTransfer.dropEffect = 'copy';
+	});
+
+	dropZone.addEventListener('drop', function(e) {
+		e.stopPropagation();
+		e.preventDefault();
+		let files = e.dataTransfer.files; // Array of all files
+
+		document.getElementById("image").src = URL.createObjectURL(files[0])
+		setTimeout(() => draw(), 10)
+	});
+
 	let data = {
 				white: {r: 255, g: 255, b: 255},
-				gray: {r: 230, g: 230, b: 230},
-				offset: 15,
-				grid: 15,
+				gray: {r: 238, g: 238, b: 238},
+				offset: 10,
+				grid: 24,
 				startColor: true,
 				drawGrid: false
 			},
