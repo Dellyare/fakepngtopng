@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>FakePNGToPNG</title>
+</head>
+<body onload="load()">
+
+<div>
+	<h1>
+		<span class="header-fake">Fake</span>PNG To PNG
+	</h1>
+</div>
+
+<div>
+	<img src="./sm_5b348d4c557a7.jpg" alt="" id="image">
+	<br>
+	<canvas id="canvas"></canvas>
+</div>
+
+<div class="controls">
+	<label for="grid">Сетка</label>
+	<input type="range" min="5" max="50" step="1" value="15" id="grid" onchange="grid()">
+	<label for="colorOffset">Точность цвета</label>
+	<input type="range" min="1" max="30" step="1" value="15" id="colorOffset" onchange="grid()">
+	<label for="drawGrid">Рисовать сетку</label>
+	<input type="checkbox" id="drawGrid" onclick="grid()">
+</div>
+
+
+</body>
+
+
+<style>
+	.header-fake {
+			color: #fc2222;
+      text-decoration: underline;
+	}
+
+	h1 {
+			color: #ffffff;
+			width: 100%;
+			text-align: center;
+	}
+	body {
+			background: #33333c;
+			padding: 0;
+			margin: 0;
+			font-family: "Segoe UI";
+	}
+
+	canvas {
+			background: magenta;
+	}
+
+</style>
+
+
+<script>
+
+	let colors = {
+		white: 255,
+		gray: 230,
+		offset: 15,
+		grid: 15,
+		startColor: 0,
+		drawGrid: false
+	}
+
+	function grid(){
+		colors.grid = +document.getElementById("grid").value;
+		colors.offset = +document.getElementById("colorOffset").value;
+		console.log(colors.offset)
+		colors.drawGrid = document.getElementById("drawGrid").checked;
+		load();
+	}
+
+	function inGrid(x, y, grid) {
+		let gridX = parseInt(x/grid),
+				gridY = parseInt(y/grid);
+
+		if ((gridX % 2 === 0 && gridY % 2 === 0) || (gridX % 2 !== 0 && gridY % 2 !== 0)) {
+			return true;
+		}
+
+	}
+
+	// 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1
+	//               ^
+	//               8
+
+	function load() {
+		let canvas = document.getElementById("canvas");
+		let ctx = canvas.getContext("2d");
+
+		ctx.fillStyle = "rgba(0,0,0,0)";
+
+		let image = document.getElementById("image");
+
+		canvas.width = image.width;
+		canvas.height = image.height;
+
+		ctx.drawImage(image, 0, 0);
+
+		let imgd = ctx.getImageData(0, 0, canvas.width, canvas.height),
+			pix = imgd.data;
+
+		for (let i = 0; i < pix.length; i += 4) {
+			let r = pix[i],
+					g = pix[i+1],
+					b = pix[i+2];
+
+			if (inGrid(parseInt((i / 4) % canvas.width), parseInt(i / (canvas.width * 4)), colors.grid)) {
+				if (
+					(r < colors.gray + colors.offset && r > colors.gray - colors.offset) &&
+					(g < colors.gray + colors.offset && g > colors.gray - colors.offset) &&
+					(b < colors.gray + colors.offset && b > colors.gray - colors.offset)
+				) {
+					pix[i + 3] = 0;
+				}
+			} else {
+				if (
+					(r < colors.white + colors.offset && r > colors.white - colors.offset) &&
+					(g < colors.white + colors.offset && g > colors.white - colors.offset) &&
+					(b < colors.white + colors.offset && b > colors.white - colors.offset)
+					) {
+					pix[i + 3] = 0;
+				}
+			}
+
+			if (colors.drawGrid && inGrid(parseInt((i / 4) % canvas.width), parseInt(i / (canvas.width * 4)), colors.grid)) {
+				pix[i] = 255;
+				pix[i+1] = 15;
+				pix[i+2] = 15;
+				pix[i+3] = 255;
+			}
+		}
+
+		ctx.putImageData(imgd, 0, 0);
+		console.log("Redraw")
+	}
+
+</script>
+</html>
