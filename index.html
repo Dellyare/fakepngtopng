@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 	<meta charset="UTF-8">
 	<title>FP2P</title>
@@ -20,7 +20,7 @@
 
 	<div class="controls">
 		<label for="grid">Размер сетки:</label>
-		<input type="range" min="5" max="50" step="1" value="24" id="grid" onchange="update()">
+		<input type="number" min="5" max="50" value="24" id="grid" onchange="update()">
 		<br>
 		<label for="drawGrid">Рисовать сетку:</label>
 		<input type="checkbox" id="drawGrid" onclick="update()">
@@ -30,7 +30,7 @@
 		<br>
 		<br>
 		<label for="colorOffset">Допуск цвета:</label>
-		<input type="range" min="1" max="50" step="1" value="10" id="colorOffset" onchange="update()">
+		<input type="number" min="1" max="50" value="10" id="colorOffset" onchange="update()">
 		<br>
 		<br>
 		<label for="colorWhite">Первый цвет:</label>
@@ -55,8 +55,8 @@
 		.canvas-holder__span {
 				font-size: 12px;
 				text-align: center;
-        width: 100%;
-        display: block;
+		        width: 100%;
+		        display: block;
 				opacity: .6;
 				cursor: default;
 		}
@@ -124,14 +124,14 @@
 		h1 {
 				width: 100%;
 				text-align: center;
-				color: #111111;
+				color: #eeeeee;
 				font-style: italic;
 		}
 		body {
 				padding: 0;
 				margin: 0;
-				font-family: "Segoe UI";
-				background: #FFFFFF;
+				font-family: sans-serif;
+				background: #272C35;
 		}
 		canvas {
 				background: magenta;
